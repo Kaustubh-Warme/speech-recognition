@@ -4,7 +4,6 @@ from moviepy.editor import VideoFileClip
 from detoxify import Detoxify
 import streamlit as st
 import wave
-import pyaudio
 
 # Function to convert video to audio and then to text
 def video_to_text(video_path):
@@ -36,55 +35,6 @@ def classify_text(text):
 
 # Streamlit UI
 st.title("Audio/Video to Text Converter and Classifier")
-
-if "recording" not in st.session_state:
-    st.session_state.recording = False
-
-if "stream" not in st.session_state:
-    st.session_state.stream = None
-
-CHUNK = 1024
-FORMAT = pyaudio.paInt16
-CHANNELS = 1
-RATE = 44100
-WAVE_OUTPUT_FILENAME = "temp_audio.wav"
-
-def start_recording():
-    audio = pyaudio.PyAudio()
-    st.session_state.stream = audio.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK)
-    st.session_state.frames = []
-    st.session_state.recording = True
-    st.write("Recording... Press 'Stop Recording' to stop.")
-
-def stop_recording():
-    stream = st.session_state.stream
-    stream.stop_stream()
-    stream.close()
-    audio = pyaudio.PyAudio()
-    frames = st.session_state.frames
-    audio.terminate()
-
-    st.write("Recording complete.")
-    with wave.open("temp_audio.wav", 'wb') as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-        wf.setframerate(RATE)
-        wf.writeframes(b''.join(frames))
-
-    text = audio_to_text(WAVE_OUTPUT_FILENAME)
-
-    if text:
-        st.write("Extracted Text:")
-        st.write(text)
-        classification = classify_text(text)
-        st.write("Classification Results:")
-        st.json(classification)
-
-if st.button("Start Recording"):
-    start_recording()
-
-if st.button("Stop Recording") and st.session_state.recording:
-    stop_recording()
 
 uploaded_file = st.file_uploader("Choose an audio or video file", type=['mp4', 'avi', 'mov', 'wav', 'mp3', 'm4a'])
 
