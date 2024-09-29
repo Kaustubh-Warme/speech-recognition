@@ -1,0 +1,5 @@
+streamlit
+moviepy
+SpeechRecognition
+Detoxify
+pyaudio==0.2.11
